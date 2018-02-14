@@ -1,10 +1,12 @@
 
-# Some random Neural nets stuff
+# Neural networks & Deep-learning
+
+### Neural nets
 
 - Ising model 2D
 - Kohonen: A sefl-organizing neural net that leans input distribution (2D)
 
-# Tensorflow
+### Tensorflow
 
 Basic sample code:
 
