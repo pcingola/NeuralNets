@@ -39,6 +39,4 @@ estimator = tf.estimator.DNNRegressor(feature_columns=feature_columns,
                                       model_dir="/tmp/tensorflow/xor_estimator"
                                       )
 
-for i in range(50):
-    print("Iteration {}".format(i))
-    estimator.train(input_fn=input_fn, steps=100)
+estimator.train(input_fn=input_fn, steps=1000)
