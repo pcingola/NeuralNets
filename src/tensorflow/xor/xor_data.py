@@ -7,6 +7,7 @@
 #                                                               Pablo Cingolani
 # -----------------------------------------------------------------------------
 
+import math
 import numpy as np
 import random
 import tensorflow as tf
@@ -24,9 +25,11 @@ NUM_SAMPLES = 100
 INPUT_NAMES = ['x1', 'x2']
 
 
-# Batch a dataset
-# Note: Manual implementation, far from optimal, but easy to understand
 def batch(data_set, batch_size):
+    """
+    Batch a dataset
+    Note: Manual implementation, far from optimal, but easy to understand
+    """
     num_samples = data_set[0].shape[0]
     m = (num_samples / batch_size) - 1
     if num_samples % batch_size != 0:
@@ -37,7 +40,11 @@ def batch(data_set, batch_size):
     return data_set[0][rmin:rmax], data_set[1][rmin:rmax]
 
 
-# Create dataset, return a tuple (x, y)
+def bias_init(num_units):
+    """ Initialzie bias tensor """
+    return tf.zeros([num_units])
+
+
 def create_data_set(num_samples=NUM_SAMPLES):
     """
     Create training dataset.
@@ -80,3 +87,8 @@ def xor(x):
     if(x[0] >= 0) ^ (x[1] >= 0):
         return 1.0
     return 0.0
+
+
+def weight_init(num_inputs, num_units):
+    """ Initialzie weight tensor """
+    return tf.truncated_normal([num_inputs, num_units], stddev=1.0 / math.sqrt(float(num_inputs)))

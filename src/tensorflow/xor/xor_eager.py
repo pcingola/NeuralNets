@@ -7,11 +7,10 @@
 # using eager execution
 #
 
-import math
 import tensorflow as tf
 import tensorflow.contrib.eager as tfe
 
-from xor_data import create_data_set, MAX_STEPS
+from xor_data import bias_init, create_data_set, weight_init, MAX_STEPS
 
 
 # Neural net paramters
@@ -19,14 +18,6 @@ IN_SIZE = 2  # Input layer size
 HIDDEN1_UNITS = 4  # Number of units in hidden layers.
 OUT_SIZE = 1  # Output layer size
 BETA = 0.3  # Learning rate
-
-
-def bias_init(num_units):
-    return tf.zeros([num_units])
-
-
-def weight_init(num_inputs, num_units):
-    return tf.truncated_normal([num_inputs, num_units], stddev=1.0 / math.sqrt(float(num_inputs)))
 
 
 class XorEager:

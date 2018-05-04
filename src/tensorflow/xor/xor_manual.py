@@ -11,7 +11,7 @@ import math
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
-from xor_data import batch, create_data_set, MAX_STEPS, BATCH_SIZE
+from xor_data import batch, bias_init, create_data_set, weight_init, MAX_STEPS, BATCH_SIZE
 
 # Directory to put the training data.
 TRAIN_DIR = "/tmp/tensorflow/xor_manual"
@@ -63,14 +63,14 @@ def nn_create(in_data, hidden1_units):
     """
     # Hidden layer
     with tf.name_scope('hidden1'):
-        weights = tf.Variable(tf.truncated_normal([IN_SIZE, hidden1_units], stddev=1.0 / math.sqrt(float(IN_SIZE))), name='weights_1')
-        biases = tf.Variable(tf.zeros([hidden1_units]), name='biases_1')
+        weights = tf.Variable(weight_init(IN_SIZE, hidden1_units), name='weights_1')
+        biases = tf.Variable(bias_init(hidden1_units), name='biases_1')
         hidden1 = tf.nn.tanh(tf.matmul(in_data, weights) + biases)
 
     # Output layer
     with tf.name_scope('output'):
-        weights = tf.Variable(tf.truncated_normal([hidden1_units, OUT_SIZE], stddev=1.0 / math.sqrt(float(hidden1_units))), name='weights_out')
-        biases = tf.Variable(tf.zeros([OUT_SIZE]), name='biases_out')
+        weights = tf.Variable(weight_init(hidden1_units, OUT_SIZE), name='weights_out')
+        biases = tf.Variable(bias_init(OUT_SIZE), name='biases_out')
         output = tf.nn.sigmoid(tf.matmul(hidden1, weights) + biases)
 
     # Return graph's last node
