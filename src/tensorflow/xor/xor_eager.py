@@ -8,139 +8,71 @@
 #
 
 import math
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow.contrib.eager as tfe
 
-from xor_data import batch, create_data_set, MAX_STEPS, BATCH_SIZE
+from xor_data import create_data_set, MAX_STEPS
 
-
-tf.enable_eager_execution()
-
-# Directory to put the training data.
-TRAIN_DIR = "/tmp/tensorflow/xor_manual"
 
 # Neural net paramters
 IN_SIZE = 2  # Input layer size
 HIDDEN1_UNITS = 4  # Number of units in hidden layers.
 OUT_SIZE = 1  # Output layer size
-beta = 0.3  # Learning rate
+BETA = 0.3  # Learning rate
 
 
-def build(nn_graph, use_xentropy=False):
-    """ Build the complete graph for feeding inputs, training, and
-        saving checkpoints.
-    Args:
-        nn_graph: An initialized graph
-        use_xentropy: If True, loss function will be Mean Corss-entropy.
-                      If False, loss functions is Root Mean Squared Error
-    Returns:
-        init: A hanle to initialize variables
-    """
-    print("Build graph")
-    with nn_graph.as_default():
-        # Generate placeholders for the inputs and outputs.
-        inputs_placeholder = tf.placeholder(tf.float32)
-        outputs_placeholder = tf.placeholder(tf.float32)
-        tf.add_to_collection("inputs", inputs_placeholder)
-        tf.add_to_collection("outputs", outputs_placeholder)
-
-        # Build a Graph that computes predictions from the inference model.
-        nn = nn_create(inputs_placeholder, HIDDEN1_UNITS)
-        tf.add_to_collection("nn", nn)
-
-        # Add to the Graph the Ops that calculate and apply gradients.
-        train_op, loss = nn_train(nn, outputs_placeholder, beta, use_xentropy)
-
-        # Add the variable initializer Op.
-        init = tf.initialize_all_variables()
-    return init, train_op, loss, inputs_placeholder, outputs_placeholder
+def bias_init(num_units):
+    return tf.zeros([num_units])
 
 
-def nn_create(in_data, hidden1_units):
-    """Create a neural network
-    Args:
-        in_data: Input data placeholder
-        hidden1_units: Size of the first hidden layer.
-    Returns:
-        logits: Output tensor with the computed logits.
-    """
-    # Hidden layer
-    with tf.name_scope('hidden1'):
-        weights = tf.Variable(tf.truncated_normal([IN_SIZE, hidden1_units], stddev=1.0 / math.sqrt(float(IN_SIZE))), name='weights_1')
-        biases = tf.Variable(tf.zeros([hidden1_units]), name='biases_1')
-        hidden1 = tf.nn.tanh(tf.matmul(in_data, weights) + biases)
-
-    # Output layer
-    with tf.name_scope('output'):
-        weights = tf.Variable(tf.truncated_normal([hidden1_units, OUT_SIZE], stddev=1.0 / math.sqrt(float(hidden1_units))), name='weights_out')
-        biases = tf.Variable(tf.zeros([OUT_SIZE]), name='biases_out')
-        output = tf.nn.sigmoid(tf.matmul(hidden1, weights) + biases)
-
-    # Return graph's last node
-    return output
+def weight_init(num_inputs, num_units):
+    return tf.truncated_normal([num_inputs, num_units], stddev=1.0 / math.sqrt(float(num_inputs)))
 
 
-# Build training graph.
-def nn_train(nn_out, out, learning_rate, use_xentropy):
-    """Build the training graph.
-    Returns:
-        train_op: The Op for training.
-        loss: The Op for calculating loss.
-    """
-    # Create an operation that calculates loss.
-    if use_xentropy:
-        loss_total = -((out * tf.log(nn_out)) + (1 - out) * tf.log(1.0 - nn_out))
-    else:
-        loss_total = tf.losses.mean_squared_error(nn_out, out)
-    loss = tf.reduce_mean(loss_total, name='loss_mean')
-    # Create the gradient descent optimizer with the given learning rate.
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-    # Create a variable to track the global step.
-    global_step = tf.Variable(0, name='global_step', trainable=False)
-    # Use the optimizer to apply the gradients that minimize the loss
-    # (and also increment the global step counter) as a single training step.
-    train_op = optimizer.minimize(loss, global_step=global_step)
-    return train_op, loss
+class XorEager:
+    def __init__(self):
+        (x_data, y_data) = create_data_set()
+        self.x_data = tf.convert_to_tensor(x_data)
+        self.y_data = tf.convert_to_tensor(y_data)
+        # Hidden layer
+        self.W1 = tfe.Variable(initial_value=weight_init(IN_SIZE, HIDDEN1_UNITS), name="W1")
+        self.B1 = tfe.Variable(initial_value=bias_init(HIDDEN1_UNITS), name="B1")
+        # Output layer
+        self.W2 = tfe.Variable(initial_value=weight_init(HIDDEN1_UNITS, OUT_SIZE), name="W2")
+        self.B2 = tfe.Variable(initial_value=bias_init(OUT_SIZE), name="B2")
 
+    def loss(self):
+        """ A loss function using mean-squared error """
+        error = self.nn() - self.y_data
+        return tf.reduce_mean(tf.square(error))
 
-def train(nn_graph, init, train_op, loss, inputs_placeholder, outputs_placeholder, data_set):
-    """ Create a session and train """
-    print("Training")
-    with tf.Session(graph=nn_graph) as sess:
-        # Run the Op to initialize the variables.
-        sess.run(init)
+    def grad(self):
+        """ Calculate the gradient of loss with respect to weights and biases """
+        with tf.GradientTape() as tape:
+            tape.watch(self.x_data)
+            loss_value = self.loss()
+        return tape.gradient(loss_value, [self.W1, self.B1, self.W2, self.B2])
 
-        # Start the training loop.
-        losses = []
-        for step in range(MAX_STEPS):
-            # Read a batch.
-            batch_in, batch_out = batch(data_set, BATCH_SIZE)
+    def nn(self):
+        """ Neural network forward propagation """
+        l1 = tf.nn.tanh(tf.matmul(self.x_data, self.W1) + self.B1)
+        output = tf.nn.sigmoid(tf.matmul(l1, self.W2) + self.B2)
+        return output
 
-            # Run one step of the model.  The return values are the activations
-            # from the `train_op` (which is discarded) and the `loss` Op.  To
-            # inspect the values of your Ops or variables, you may include them
-            # in the list passed to sess.run() and the value tensors will be
-            # returned in the tuple from the call.
-            _, loss_value = sess.run([train_op, loss], feed_dict={inputs_placeholder: batch_in, outputs_placeholder: batch_out})
-
-            losses.append(loss_value)
-
-            # Print out loss value.
-            if step % 100 == 0:
-                print('Step %d: loss = %.2f' % (step, loss_value))
-
-        # Write a checkpoint.
-        plt.plot(losses)
-        plt.show()
+    def train(self, train_steps=MAX_STEPS, beta=BETA):
+        print("Initial loss: {:f}".format(self.loss()))
+        for i in range(train_steps):
+            dW1, dB1, dW2, dB2 = self.grad()
+            self.W1.assign_sub(beta * dW1)
+            self.B1.assign_sub(beta * dB1)
+            self.W2.assign_sub(beta * dW2)
+            self.B2.assign_sub(beta * dB2)
+            if i % 100 == 0:
+                print("\t{:d}\t{:f}".format(i, self.loss()))
+        print("Loss after training: {:f}".format(self.loss()))
 
 
 # Main
-def main_l2():
-    data_set = create_data_set()
-    nn_graph = tf.Graph()
-    init, train_op, loss, inputs_placeholder, outputs_placeholder = build(nn_graph)
-    train(nn_graph, init, train_op, loss, inputs_placeholder, outputs_placeholder, data_set)
-
-if __name__ == "__main__":
-    main_l2()
+tf.enable_eager_execution()
+xor_eager = XorEager()
+xor_eager.train()

@@ -47,7 +47,6 @@ def create_data_set(num_samples=NUM_SAMPLES):
     x_data = (2 * np.random.rand(num_samples, 2) - 1).astype(np.float32)
     y_data = np.asarray([xor(xi) for xi in x_data], np.float32)
     y_data.shape = (num_samples, 1)
-    print("Input data:\n" + str(np.concatenate((y_data, x_data), axis=1)))
     return x_data, y_data
 
 
