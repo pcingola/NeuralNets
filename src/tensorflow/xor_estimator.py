@@ -8,6 +8,7 @@ input_names = ['x1', 'x2']
 
 
 def input_fn(num_samples=100, batch_size=100, repeat=True):
+    print("input_fn")
     x_data = 2 * np.random.rand(num_samples, 2).astype(np.float32) - 1
     x1 = x_data[:, 0]
     x2 = x_data[:, 1]
@@ -23,8 +24,8 @@ def input_fn(num_samples=100, batch_size=100, repeat=True):
 def xor(x):
     """ Xor function for two inputs """
     if(x[0] >= 0) ^ (x[1] >= 0):
-        return 1.0
-    return 0.0
+        return 0.9
+    return 0.1
 
 
 # Create feature columns
@@ -36,7 +37,8 @@ for x in input_names:
 estimator = tf.estimator.DNNRegressor(feature_columns=feature_columns,
                                       hidden_units=[2],
                                       activation_fn=tf.tanh,
-                                      model_dir="/tmp/tensorflow/xor_estimator"
+                                      model_dir="/tmp/tensorflow/xor_estimator",
+                                      optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.005)
                                       )
 
-estimator.train(input_fn=input_fn, steps=1000)
+estimator.train(input_fn=input_fn, steps=300)
