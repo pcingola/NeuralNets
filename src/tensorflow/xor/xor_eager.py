@@ -51,7 +51,8 @@ class XorEager:
         return output
 
     def train(self, train_steps=MAX_STEPS, beta=BETA):
-        print("Initial loss: {:f}".format(self.loss()))
+        """ Train the neural network using 'simple gradient descent' """
+        print("Start loss: {:f}".format(self.loss()))
         for i in range(train_steps):
             dW1, dB1, dW2, dB2 = self.grad()
             self.W1.assign_sub(beta * dW1)
@@ -60,7 +61,7 @@ class XorEager:
             self.B2.assign_sub(beta * dB2)
             if i % 100 == 0:
                 print("\t{:d}\t{:f}".format(i, self.loss()))
-        print("Loss after training: {:f}".format(self.loss()))
+        print("End loss: {:f}".format(self.loss()))
 
 
 # Main
