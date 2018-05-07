@@ -83,7 +83,7 @@ def input_fn(num_samples=NUM_SAMPLES, batch_size=BATCH_SIZE, repeat=True):
 
 
 def zeros_init(num_inputs, num_units):
-    """ Initialzie weight tensor """
+    """ Initialzie with zeros tensor """
     return tf.zeros([num_inputs, num_units])
 
 def xor(x):
