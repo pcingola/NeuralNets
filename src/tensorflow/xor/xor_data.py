@@ -20,7 +20,7 @@ BATCH_SIZE = 100
 MAX_STEPS = 1000
 
 # Number of samples (input dataset is created randomly)
-NUM_SAMPLES = 100
+NUM_SAMPLES = 10
 
 INPUT_NAMES = ['x1', 'x2']
 
@@ -81,6 +81,10 @@ def input_fn(num_samples=NUM_SAMPLES, batch_size=BATCH_SIZE, repeat=True):
         dataset = dataset.repeat()
     return dataset.batch(batch_size)
 
+
+def zeros_init(num_inputs, num_units):
+    """ Initialzie weight tensor """
+    return tf.zeros([num_inputs, num_units])
 
 def xor(x):
     """ Xor function for two inputs """
