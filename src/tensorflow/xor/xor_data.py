@@ -40,11 +40,6 @@ def batch(data_set, batch_size):
     return data_set[0][rmin:rmax], data_set[1][rmin:rmax]
 
 
-def bias_init(num_units):
-    """ Initialzie bias tensor """
-    return tf.zeros([num_units])
-
-
 def create_data_set(num_samples=NUM_SAMPLES):
     """
     Create training dataset.
@@ -82,10 +77,6 @@ def input_fn(num_samples=NUM_SAMPLES, batch_size=BATCH_SIZE, repeat=True):
     return dataset.batch(batch_size)
 
 
-def zeros_init(num_inputs, num_units):
-    """ Initialzie with zeros tensor """
-    return tf.zeros([num_inputs, num_units])
-
 def xor(x):
     """ Xor function for two inputs """
     if(x[0] >= 0) ^ (x[1] >= 0):
@@ -93,6 +84,13 @@ def xor(x):
     return 0.0
 
 
-def weight_init(num_inputs, num_units):
+def weight_init(num_units, num_inputs):
     """ Initialzie weight tensor """
     return tf.truncated_normal([num_inputs, num_units], stddev=1.0 / math.sqrt(float(num_inputs)))
+
+
+def zeros_init(num_units, num_inputs=None):
+    """ Initialzie with zeros tensor """
+    if num_inputs:
+        return tf.zeros([num_inputs, num_units])
+    return tf.zeros([num_units])
