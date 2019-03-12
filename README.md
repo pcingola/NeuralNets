@@ -20,7 +20,3 @@ More advanced:
 - Facial recognition
 - Sex identification (from facial recognition)
 
-
-
-
-

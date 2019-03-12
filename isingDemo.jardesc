@@ -1,15 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-<jar path="/root/isingDemo.jar"/>
-<options buildIfNeeded="true" compress="true" descriptionLocation="/NeuralNets/isingDemo.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" useSourceFolders="false"/>
-<manifest generateManifest="true" mainClassHandleIdentifier="=NeuralNets/src&lt;com.pcingola.neunet.ising{IsingNeuNetDemo.java[IsingNeuNetDemo" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
-<sealing sealJar="false">
-<packagesToSeal/>
-<packagesToUnSeal/>
-</sealing>
-</manifest>
-<selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
-<javaElement handleIdentifier="=NeuralNets/src"/>
-<file path="/NeuralNets/isingDemo.jardesc"/>
-</selectedElements>
+    <jar path="NeuralNets/isingDemo.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/NeuralNets/isingDemo.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=NeuralNets/src&lt;com.pcingola.neunet.ising{IsingNeuNetDemo.java[IsingNeuNetDemo" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <javaElement handleIdentifier="=NeuralNets/src"/>
+        <file path="/NeuralNets/isingDemo.jardesc"/>
+    </selectedElements>
 </jardesc>
