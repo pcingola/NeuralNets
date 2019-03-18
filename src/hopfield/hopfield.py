@@ -8,6 +8,14 @@ import numpy as np
 import os
 
 
+def img_noise(pixels, rand_th):
+    ''' Randomly set pixes in an image '''
+    r = np.random.rand(len(pixels))
+    pixels[r < rand_th / 2] = -1
+    pixels[(r >= rand_th / 2) & (r <= rand_th)] = +1
+    return pixels
+
+
 def img_threshold(pixel, threshold=0.5):
     ''' Convert pixel into a B&W by applying a threshold '''
     if isinstance(pixel, np.ndarray):
@@ -23,34 +31,42 @@ def img2bw(file_name, show=False):
     size_x = imgbw.shape[0]
     size_y = imgbw.shape[1]
     pixels = np.zeros((size_x, size_y))
+    # Convert to B&W using a simple threshold
     for i in range(size_x):
         for j in range(size_y):
-            # print(f"{i, j}\t{imgbw[i][j]}")
             pixels[i][j] = img_threshold(imgbw[i][j])
-
+    # Create new image
     imgbw = pixels
     imgbw.shape = pixels.shape
     print(f"DEBUG img2bw: File '{file_name}', image B&W shape {imgbw.shape}")
-
+    # Show image?
     if show:
-        fig, (plt_ori, plt_bw) = plt.subplots(1, 2)
-        plt_ori.imshow(img, cmap='gray')
-        plt_ori.axis('off')
-        plt_ori.set_title('Original')
-        plt_bw.imshow(imgbw, cmap='gray')
-        plt_bw.axis('off')
-        plt_bw.set_title('B&W')
-        plt.show()
-
+        show2(img, imgbw)
+    # Return a flat array
     return pixels.flatten()
 
 
-class Hopfield:
+def show2(img1, img2):
+    ''' Show two images '''
+    fig, (plt1, plt2) = plt.subplots(1, 2)
+    print(f"img1: {img1.shape}, img2: {img2.shape}")
+    plt1.imshow(img1, cmap='gray')
+    plt1.axis('off')
+    plt2.imshow(img2, cmap='gray')
+    plt2.axis('off')
+    plt.show()
 
-    def __init__(self):
+
+class Hopfield:
+    ''' Simple neural network based on Hopfield model '''
+
+    def __init__(self, size_x, size_y):
+        self.size_x = size_x
+        self.size_y = size_y
         self.samples = list()
-        self.len = -1
+        self.len = size_x * size_y
         self.weight_matrix_file = "hopfield_demo_w.npy"
+        self.s = np.zeros(size_x * size_y)
         pass
 
     def add_image(self, file):
@@ -67,15 +83,16 @@ class Hopfield:
         # Add vector to list
         self.samples.append(v)
 
-    def calc(self, input):
-        if len(input) != self.len:
-            print(f"ERROR: Input length {len(input)} doesn't match network size {self.len}")
-            exit(1)
-        self.s = input
+    def calc(self):
+        self.s_previous = np.copy(self.s)
         self.s = np.matmul(self.w, self.s)
         self.s[self.s >= 0] = 1.0
         self.s[self.s < 0] = -1.0
         print(f"DEBUG Hopfield.calc: s = {self.s}")
+
+    def has_changed(self):
+        ''' Has the network output changed? '''
+        return np.any(self.s != self.s_previous)
 
     def learn(self):
         ''' Learn using Hopfield equations '''
@@ -89,10 +106,12 @@ class Hopfield:
         self.w = self.w / n
 
     def train(self, images):
+        ''' Train neural network: Load all samples and calculate weigths '''
         if os.path.isfile(self.weight_matrix_file):
             print(f"DEBUG Hopfield.train: Loading weight matrix file '{self.weight_matrix_file}'")
             self.w = np.load(self.weight_matrix_file)
-            self.len = np.shape(self.w)[0]
+            if self.len != np.shape(self.w)[0]:
+                raise Exception("Matrix dimensions doesn't match image sizes")
             return
 
         # Load all images and add them to training set
@@ -104,6 +123,19 @@ class Hopfield:
         print(f"DEBUG Hopfield.train: Saving weight matrix to file '{self.weight_matrix_file}'")
         np.save(self.weight_matrix_file, self.w)
 
+    def show(self, img):
+        ''' Show current output '''
+        img_s = np.copy(self.s)
+        img_s.shape = (self.size_x, self.size_x)
+        show2(img, img_s)
+
+    def set(self, input):
+        ''' Set network '''
+        if len(input) != self.len:
+            print(f"ERROR: Input length {len(input)} doesn't match network size {self.len}")
+            exit(1)
+        self.s = input
+
 
 # -----------------------------------------------------------------------------
 # Main
@@ -112,12 +144,30 @@ class Hopfield:
 # pixels = img2bw('data/images/lena.png', True)
 
 img_path = 'data/images'
-images = [f"{img_path}/baboon_small.png", f"{img_path}/lena_small.png"]
+images = [f"{img_path}/lena_small.png", f"{img_path}/baboon_small.png"]
 
-nn = Hopfield()
+# Create a NN and train it
+size_x = 64
+size_y = 64
+nn = Hopfield(size_x, size_y)
 nn.train(images)
 
+# Test using an image
+input_ori = img2bw(images[0])
+input_ori.shape = (size_x, size_y)
+
 input = img2bw(images[0])
-nn.calc(input)
+input_noise = img_noise(input, 0.5)
+nn.set(input_noise)
+
+for i in range(100):
+    print(f"Iteration {i}")
+    nn.show(input_ori)
+    nn.calc()
+    if not nn.has_changed():
+        print("Done!")
+        nn.show(input_ori)
+        exit(0)
+
 
 # imgplot = plt.imshow(img)
