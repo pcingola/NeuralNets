@@ -10,6 +10,8 @@ RAND_WEIGHT_FACTOR = 0.1
 XOR_INPUTS = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
 XOR_OUTPUTS = np.array([0, 1, 1, 0])
 
+neuron_id = 0
+
 
 class Neuron:
     '''
@@ -18,13 +20,17 @@ class Neuron:
     '''
     def __init__(self, input_neurons=list()):
         ''' Initialzie parameters '''
+        global neuron_id
+        self.id = neuron_id
+        neuron_id += 1
+        self.fan_in = len(input_neurons)
         self.out = 0.0
+        self.w = RAND_WEIGHT_FACTOR * (2.0 * np.random.rand((self.fan_in)) - 1.0)
+        self.input_neurons = input_neurons
+        # Error back-propagation
         self.delta = 0.0
         self.sum_delta = 0.0
-        self.fan_in = len(input_neurons)
-        self.w = RAND_WEIGHT_FACTOR * (2.0 * np.random.rand((self.fan_in)) - 1.0)
         self.delta_w = np.zeros((self.fan_in))
-        self.input_neurons = input_neurons
 
     def backprop(self):
         ''' Perform a back-propagation '''
@@ -61,7 +67,7 @@ class Neuron:
         self.w -= eta * self.delta_w
 
     def __str__(self):
-        return f"output: {self.out}, weights: {self.w}, delta: {self.delta}, sum_delta: {self.sum_delta}"
+        return f"id: {self.id}, output: {self.out}, weights: {self.w}, delta: {self.delta}, sum_delta: {self.sum_delta}"
 
 
 def train(layers, data_in, data_out):
@@ -80,7 +86,7 @@ def train(layers, data_in, data_out):
         # Calculate outputs for all neurons (forward propagation)
         for n in neurons:
             n.calc()
-            print(f"\t{n}")
+            print(f"\tFW: {n}")
         print(f"FW: {layers[0][0].out} , {layers[0][1].out} => {layers[1][0].out} , {layers[1][1].out} => {n_out.out}")
         # Backpropagation
         for n in neurons:
@@ -89,8 +95,8 @@ def train(layers, data_in, data_out):
         n_out.sum_delta = diff_loss
         for n in neurons_rev:
             n.backprop()
-            n.update_w(eta)
-            print(f"\t{n}")
+            print(f"\tBP: {n}")
+            #n.update_w(eta)
         print(f"BP: {layers[0][0].delta} , {layers[0][1].delta} => {layers[1][0].delta} , {layers[1][1].delta} => {n_out.delta}\n")
         # Calculate loss function
         sum_loss += diff_loss * diff_loss
