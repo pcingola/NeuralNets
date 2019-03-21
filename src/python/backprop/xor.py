@@ -26,17 +26,18 @@ class Neuron:
         self.fan_in = len(input_neurons)
         self.out = 0.0
         self.w = RAND_WEIGHT_FACTOR * (2.0 * np.random.rand((self.fan_in)) - 1.0)
+        self.w = np.array([0.2, -0.1, 0.1])
         self.input_neurons = input_neurons
         # Error back-propagation
         self.delta = 0.0
-        self.sum_delta = 0.0
+        self.delta_sum = 0.0
         self.delta_w = np.zeros((self.fan_in))
 
     def backprop(self):
         ''' Perform a back-propagation '''
-        self.delta = self.sum_delta * self.phi_prime()
+        self.delta = self.delta_sum * self.phi_prime()
         for i, n in enumerate(self.input_neurons):
-            n.sum_delta += self.delta * self.w[i]
+            n.delta_sum += self.delta * self.w[i]
             self.delta_w[i] = n.out * self.delta
 
     def calc(self):
@@ -44,6 +45,7 @@ class Neuron:
         ins = np.array([n.out for n in self.input_neurons])
         h = np.dot(self.w, ins)
         self.out = self.phi(h)
+        print(f"id{self.id}\tins: {ins}\th: {h}\tout: {self.out}")
 
     def phi(self, h):
         ''' Neuron's transfer function '''
@@ -58,7 +60,7 @@ class Neuron:
         self.w -= eta * self.delta_w
 
     def __str__(self):
-        return f"id: {self.id}, output: {self.out}, weights: {self.w}, delta: {self.delta}, sum_delta: {self.sum_delta}"
+        return f"id: {self.id}, output: {self.out}, weights: {self.w}, delta: {self.delta}, delta_sum: {self.delta_sum}"
 
 
 class Network:
@@ -83,22 +85,22 @@ class Network:
         reversed(self.neurons_rev)
 
     def backprop(self, num_in):
+        ''' Back-propagate weights '''
         # Reset delta_sum
         for n in self.neurons:
-            n.sum_delta = 0
+            n.delta_sum = 0
         # Calculate output delta
-        diff_loss = (self.n_out.out - self.data_out[num_in])
-        self.n_out.sum_delta = diff_loss
+        diff_loss = (self.data_out[num_in] - self.n_out.out)
+        self.n_out.delta_sum = diff_loss
         # Backpropagation
         for n in self.neurons_rev:
             n.backprop()
             print(f"\tBP: {n}")
-            #n.update_w(eta)
-        print(f"BP: {self.layers[0][0].delta} , {self.layers[0][1].delta} => {self.layers[1][0].delta} , {self.layers[1][1].delta} => {self.n_out.delta}\n")
+        print(f"BP: {self.layers[0][0].delta_sum} , {self.layers[0][1].delta_sum} => {self.layers[1][0].delta_sum} , {self.layers[1][1].delta_sum} => {self.n_out.delta_sum}\n")
         return diff_loss * diff_loss
 
     def calc(self):
-        # Calculate outputs for all neurons (forward propagation)
+        ''' Calculate outputs for all neurons (forward propagation) '''
         for n in self.neurons:
             n.calc()
             print(f"\tFW: {n}")
@@ -111,20 +113,23 @@ class Network:
 
     def train(self):
         ''' Train a neural network (one iteration) '''
-        # For each input sample...
         sum_loss = 0.0
         num_samples = self.data_in.shape[0]
         n_out = self.layers[2][0]
         eta = 0.1
+        # For each input sample...
         for i in range(num_samples):
             self.set_inputs(i)
             self.calc()
             sum_loss += self.backprop(i)
         loss = sum_loss / (2.0 * num_samples)
         print(f"loss = {loss}")
-        # Calculate cummulative gradient (backwards propagation)
+        # Update weights
+        for n in self.neurons:
+            n.update_w(eta)
 
 
 # Train
 net = Network(XOR_INPUTS, XOR_OUTPUTS)
-net.train()
+for i in range(100):
+    net.train()
