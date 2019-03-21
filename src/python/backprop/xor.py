@@ -41,18 +41,9 @@ class Neuron:
 
     def calc(self):
         ''' Calculate neuron's output '''
-        ins = self.get_inputs()
+        ins = np.array([n.out for n in self.input_neurons])
         h = np.dot(self.w, ins)
         self.out = self.phi(h)
-
-    def connect(self, n):
-        ''' Connect neuron's "n" output to this neuron's input '''
-        self.input_neurons.append(n)
-        return self
-
-    def get_inputs(self):
-        ''' Get neuron's inputs as a vector '''
-        return np.array([n.out for n in self.input_neurons])
 
     def phi(self, h):
         ''' Neuron's transfer function '''
@@ -70,58 +61,70 @@ class Neuron:
         return f"id: {self.id}, output: {self.out}, weights: {self.w}, delta: {self.delta}, sum_delta: {self.sum_delta}"
 
 
-def train(layers, data_in, data_out):
-    ''' Train a neural network (one iteration) '''
-    # For each input sample...
-    sum_loss = 0.0
-    num_samples = data_in.shape[0]
-    neurons = [n for l in layers[1:] for n in l]
-    neurons_rev = reversed(list(neurons))
-    n_out = layers[2][0]
-    eta = 0.1
-    for i in range(num_samples):
-        # Set network inputs
-        for j, n_in in enumerate(layers[0]):
-            n_in.out = data_in[i, j]
-        # Calculate outputs for all neurons (forward propagation)
-        for n in neurons:
-            n.calc()
-            print(f"\tFW: {n}")
-        print(f"FW: {layers[0][0].out} , {layers[0][1].out} => {layers[1][0].out} , {layers[1][1].out} => {n_out.out}")
-        # Backpropagation
-        for n in neurons:
+class Network:
+    ''' A neural network to solve the XOR problem '''
+    def __init__(self, data_in, data_out):
+        ''' Create a fully connected network to solve XOR problem, return layers of neurons '''
+        self.data_in = data_in
+        self.data_out = data_out
+        # Create 'placeholders' (inputs and bias)
+        bias = Neuron()
+        bias.out = 1.0
+        in1 = Neuron()
+        in2 = Neuron()
+        # Create neurons and connect them
+        n1 = Neuron([bias, in1, in2])
+        n2 = Neuron([bias, in1, in2])
+        self.n_out = Neuron([bias, n1, n2])
+        # Create layers
+        self.layers = [[in1, in2], [n1, n2], [self.n_out]]
+        self.neurons = [n for l in self.layers[1:] for n in l]
+        self.neurons_rev = self.neurons.copy()
+        reversed(self.neurons_rev)
+
+    def backprop(self, num_in):
+        # Reset delta_sum
+        for n in self.neurons:
             n.sum_delta = 0
-        diff_loss = (n_out.out - data_out[i])
-        n_out.sum_delta = diff_loss
-        for n in neurons_rev:
+        # Calculate output delta
+        diff_loss = (self.n_out.out - self.data_out[num_in])
+        self.n_out.sum_delta = diff_loss
+        # Backpropagation
+        for n in self.neurons_rev:
             n.backprop()
             print(f"\tBP: {n}")
             #n.update_w(eta)
-        print(f"BP: {layers[0][0].delta} , {layers[0][1].delta} => {layers[1][0].delta} , {layers[1][1].delta} => {n_out.delta}\n")
-        # Calculate loss function
-        sum_loss += diff_loss * diff_loss
-    loss = sum_loss / (2.0 * num_samples)
-    print(f"loss = {loss}")
-    # Calculate cummulative gradient (backwards propagation)
+        print(f"BP: {self.layers[0][0].delta} , {self.layers[0][1].delta} => {self.layers[1][0].delta} , {self.layers[1][1].delta} => {self.n_out.delta}\n")
+        return diff_loss * diff_loss
 
+    def calc(self):
+        # Calculate outputs for all neurons (forward propagation)
+        for n in self.neurons:
+            n.calc()
+            print(f"\tFW: {n}")
+        print(f"FW: {self.layers[0][0].out} , {self.layers[0][1].out} => {self.layers[1][0].out} , {self.layers[1][1].out} => {self.n_out.out}")
 
-def create_network():
-    ''' Create a fully connected network to solve XOR problem, return layers of neurons '''
-    # Create 'placeholders' (inputs and bias)
-    bias = Neuron()
-    bias.out = 1.0
-    in1 = Neuron()
-    in2 = Neuron()
+    def set_inputs(self, num_in):
+        ''' Set netwok inputs with sample number 'num_in' '''
+        for j, n_in in enumerate(self.layers[0]):
+            n_in.out = self.data_in[num_in, j]
 
-    # Create neurons and connect them
-    n1 = Neuron([bias, in1, in2])
-    n2 = Neuron([bias, in1, in2])
-    n_out = Neuron([bias, n1, n2])
-
-    return [[in1, in2], [n1, n2], [n_out]]
+    def train(self):
+        ''' Train a neural network (one iteration) '''
+        # For each input sample...
+        sum_loss = 0.0
+        num_samples = self.data_in.shape[0]
+        n_out = self.layers[2][0]
+        eta = 0.1
+        for i in range(num_samples):
+            self.set_inputs(i)
+            self.calc()
+            sum_loss += self.backprop(i)
+        loss = sum_loss / (2.0 * num_samples)
+        print(f"loss = {loss}")
+        # Calculate cummulative gradient (backwards propagation)
 
 
 # Train
-layers = create_network()
-for i in range(200):
-    train(layers, XOR_INPUTS, XOR_OUTPUTS)
+net = Network(XOR_INPUTS, XOR_OUTPUTS)
+net.train()
