@@ -25,17 +25,17 @@ class Neuron:
         neuron_id += 1
         self.fan_in = len(input_neurons)
         self.out = 0.0
-        self.w = RAND_WEIGHT_FACTOR * (2.0 * np.random.rand((self.fan_in)) - 1.0)
         self.input_neurons = input_neurons
         self.reset_delta_w()
         self.delta = 0
         self.delta_sum = 0
+        self.w = # TODO: Initialize weights
 
     def backprop(self):
         ''' Perform a back-propagation '''
         self.delta = self.delta_sum * self.phi_prime()
         for i, n in enumerate(self.input_neurons):
-            n.delta_sum += self.w[i] * self.delta
+            # TODO: Back-propagate deltas
             self.delta_w[i] += n.out * self.delta
 
     def calc(self):
@@ -43,8 +43,7 @@ class Neuron:
         self.delta = 0
         self.delta_sum = 0
         ins = np.array([n.out for n in self.input_neurons])
-        h = np.dot(self.w, ins)
-        self.out = self.phi(h)
+        # TODO: Calculate neuron's output
 
     def phi(self, h):
         ''' Neuron's transfer function '''
@@ -52,14 +51,14 @@ class Neuron:
 
     def phi_prime(self):
         ''' Neuron's transfer function derivate '''
-        return self.out * (1.0 - self.out)
+        return # TODO: Calculate transfer's function derivate
 
     def reset_delta_w(self):
         self.delta_w = np.zeros((self.fan_in)) # Weight update
 
     def update_w(self, eta):
         ''' Update weights '''
-        self.w -= eta * self.delta_w
+        # TODO: Update weights
 
     def __str__(self):
         return f"id: {self.id}, output: {self.out}, weights: {self.w}, delta: {self.delta}, delta_sum: {self.delta_sum}, delta_w: {self.delta_w}"
@@ -71,9 +70,10 @@ class Network:
         ''' Create a fully connected network to solve XOR problem, return layers of neurons '''
         self.data_in = data_in
         self.data_out = data_out
-        # Create 'placeholders' (inputs and bias)
+        # Create 'bias'
         bias = Neuron()
         bias.out = 1.0
+        # Create 'placeholders' for inputs
         in1 = Neuron()
         in2 = Neuron()
         # Create neurons and connect them
