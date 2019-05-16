@@ -2,40 +2,13 @@
 
 import tensorflow as tf
 import numpy as np
-import os
 
-from subprocess import Popen, PIPE, STDOUT
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Sequential
 
+from select_gpu import select_empty_gpu
 
-def find_empty_gpu():
-	'''
-	Pick an empty GPU: Query using nvidia-smi, parse output and
-	return the first available GPU that has no process associated
-	'''
-	p = Popen(['nvidia-smi', '-q'], stdout=PIPE, stderr=PIPE)
-	(stdout, stderr) = p.communicate()
-	stdout = stdout.decode("utf-8")
-	gpu_number = ''
-	for line in stdout.split('\n'):
-		# Parse output, format is 'key : value'
-		if line.find(':') < 0:
-			continue
-		(key, value) = [s.strip() for s in line.split(':', maxsplit=1)]
-		if key == 'Minor Number':
-			gpu_number = value
-		if key == 'Processes' and value == 'None' and gpu_number:
-			return gpu_number
-	return None
 
-def select_empty_gpu():
-	''' Find and select the first empty GPU '''
-	gpu_number = find_empty_gpu()
-	if not gpu_number:
-		raise "Could not find an empty GPU"
-	os.environ['CUDA_VISIBLE_DEVICES'] = gpu_number
-	
 def nn(x_train, y_train):
 	model = Sequential([
 		Dense(3, input_dim=2, activation='tanh'),
