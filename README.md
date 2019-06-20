@@ -1,6 +1,8 @@
 
 # Neural networks & Deep-learning
 
+**[Notes and learning points])(doc/)**
+
 ### Neural nets
 
 - Ising model 2D
