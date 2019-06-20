@@ -52,5 +52,9 @@ Ref: [Fast.ai: Introduction to random forests](http://course18.fast.ai/lessonsml
 
 Ref: [Fast.ai: Random forest deep dive](http://course18.fast.ai/lessonsml1/lesson2.html)
 - Create a shallow RandomForest model having a single tree: it's a crappy model, but you can draw the tree to gain insight into the data.
+- Building a tree:
+  - How to build a RandomForest: Just build a bunch of Trees
+  - How to build a Tree: For each variable, for each possible splits (middle point betwee in your dataset), pick the 'best' split
+  - How to compare 'splits': For each split compare the r^2 of the parent node vs the weighted average of the r^2 of the child nodes
 
 
