@@ -29,8 +29,19 @@ These are in no particular order
 
 - Course of dimentionality is not a real concern in practice for many ML problems
 - The "No free lunch" theorem doesn't usually apply in practice because practical ML problems are not totally random data (i.e. the data lies within a sub-manifold)
-- Tip: Expand 'data/timestamp' into many columns
-- r^2 is a number below 1.0, it can be negative infinity (not between 0 and 1 as many people think)
+- `r^2 = 1-SS_reg / SS_tot`, the second term is the ratio between `SS_reg` (sum of squared errors of our model) and `SS_tot` (sum of squared error of a very naive estimator, that is the just the mean). This is a number below 1.0, it can be negative infinity (not between 0 and 1 as many people think)
+
+### Data pre-processing
+
+- Try sorting accordingly if the categorical data has an ordering, e.g. `['low' 'medium' 'high']` it sometimes provides a small advantage (by default most packages just sort alphabetically)
+- Expand 'data/timestamp' into many columns (`year, month, day, day_of_weeK, is_holliday`, etc.)
+- Saving the data in `feather` format is udualy fast (the dataFrame is just dumped from memory to disk, so it's fast)
+- Dividing 80% training, 10% testing and 10% validation works usualy OK, but if you have millions of samples, you might only need 1% for test and validation (or even 0.1%)
+
+### Exploratory data analaysis
+
+- Calculate ranking variuables having missing values
+- Create a shallow RandomForest model having a single tree: it's a crappy model, but you can draw the tree to gain insight into the data.
 
 ### Random Forests
 
@@ -38,5 +49,8 @@ Ref: [Fast.ai: Introduction to random forests](http://course18.fast.ai/lessonsml
 - See Jupiter notebook `ml/randomForest/Bulldozers.ipynb`
 - Random forest are easy, generic and require no prior assumptions
 - To use a random forest you need to convert categorical data to numeric.
-- Try sorting accordingly if the categorical data has an ordering, e.g. `['low' 'medium' 'high']` it sometimes provides a small advantage
+
+Ref: [Fast.ai: Random forest deep dive](http://course18.fast.ai/lessonsml1/lesson2.html)
+- Create a shallow RandomForest model having a single tree: it's a crappy model, but you can draw the tree to gain insight into the data.
+
 
