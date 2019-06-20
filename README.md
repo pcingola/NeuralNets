@@ -43,6 +43,11 @@ These are in no particular order
 - Calculate ranking variuables having missing values
 - Create a shallow RandomForest model having a single tree: it's a crappy model, but you can draw the tree to gain insight into the data.
 
+### Ensemble models
+- Bagging: Create many models that are somewhat predictive, but have un-correlated errors. When you average all the models, you have `mean(prediction_i + error_i) = mean(prediction_i) + mean(error_i)`. The second term tends to zero (errors are uncorrelated with mean 0), so we have a much better predition.
+- Bag if little bootstraps: It is more important to be uncorrelated than predictive (e.g. Extremelly randomized trees)
+
+
 ### Random Forests
 
 Ref: [Fast.ai: Introduction to random forests](http://course18.fast.ai/lessonsml1/lesson1.html)
@@ -56,5 +61,6 @@ Ref: [Fast.ai: Random forest deep dive](http://course18.fast.ai/lessonsml1/lesso
   - How to build a RandomForest: Just build a bunch of Trees
   - How to build a Tree: For each variable, for each possible splits (middle point betwee in your dataset), pick the 'best' split
   - How to compare 'splits': For each split compare the r^2 of the parent node vs the weighted average of the r^2 of the child nodes
+  - In practice: Gini gain is often used
 
 
