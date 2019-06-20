@@ -1,7 +1,7 @@
 
 # Neural networks & Deep-learning
 
-**[Notes and learning points])(doc/)**
+**[Notes and learning points](doc/)**
 
 ### Neural nets
 
