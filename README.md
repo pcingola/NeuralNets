@@ -20,3 +20,9 @@ More advanced:
 - Facial recognition
 - Sex identification (from facial recognition)
 
+# Notes & Learning points
+
+Some learning points about ML & AI.
+These are in no particular order
+
+Ref: [Fast.ai: Introduction to random forests](http://course18.fast.ai/lessonsml1/lesson1.html)
