@@ -15,8 +15,12 @@ model = Sequential([
     Dense(1, activation='tanh')
 ])
 
-adam = tf.keras.optimizers.Adagrad(lr=0.1)
-model.compile(optimizer=adam, loss='mean_squared_error')
+opt = tf.keras.optimizers.Adagrad(lr=0.1)
+opt = tf.keras.optimizers.SGD(lr=0.1)
+opt = tf.keras.optimizers.Adam(lr=0.1)
+opt = tf.keras.optimizers.Adamax(lr=0.1)
+opt = tf.keras.optimizers.Nadam(lr=0.1)
+model.compile(optimizer=opt, loss='mean_squared_error')
 
 callbacks = [tf.keras.callbacks.TensorBoard(log_dir='./logs')]
 
