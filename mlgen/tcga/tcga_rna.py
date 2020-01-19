@@ -1,14 +1,8 @@
-import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 import pandas as pd
-import seaborn as sb
-import sklearn as sk
 import statsmodels as sm
-import sys
-import os
 
-from pathlib import Path
+from util import *
 
 
 def rnaseq_load(cancer_type):
