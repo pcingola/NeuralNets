@@ -5,10 +5,13 @@ from statsmodels.stats.diagnostic import kstest_normal
 
 from util import *
 
+DEBUG = True
+
 
 def rnaseq_load(path):
     ''' Load RnaSeq dataFrame and remove first row '''
-    print(f"Loading file: '{path}'")
+    if DEBUG:
+        print(f"Loading file: '{path}'")
     df = pd.read_csv(path, sep="\t", index_col=0, low_memory=False)
     df.drop('gene_id', inplace=True) # Remove second row, we don't use it
     df = df.astype('float')  # Convert values to float
@@ -20,7 +23,8 @@ def rnaseq_save(df, cancer_type, name):
     ''' Save RnaSeq dataFrame '''
     data_path = Path('data')
     file_name = data_path / 'tcga' / f"{cancer_type}.{name}.csv"
-    print(f"Saving to file: '{file_name}'")
+    if DEBUG:
+        print(f"Saving to file: '{file_name}'")
     df.to_csv(file_name)
 
 
@@ -97,7 +101,8 @@ def normality(df, use_logp1):
     """ Do a normality test, or a log-normality test if '''use_log' is set """
     pvals = [normality_test(df.iloc[i,], use_logp1) for i in range(df.shape[0])]
     pvals = np.array(pvals)
-    print(f"Failed tests: {np.isnan(pvals).sum()}")
+    if np.isnan(pvals).sum() > 0:
+        print(f"Failed tests: {np.isnan(pvals).sum()}")
     pvals = np.nan_to_num(pvals, nan=0) # Test failed? Assume not normal
     return pvals
 
@@ -136,7 +141,8 @@ transforms_default = [logp1_normalize, rename_genes]
 
 def apply_all(x, funcs):
     for f in funcs:
-        print(f"Applying {f.__name__}, x.shape: {x.shape}")
+        if DEBUG:
+            print(f"Applying {f.__name__}, x.shape: {x.shape}")
         x = f(x)
     return x
 
