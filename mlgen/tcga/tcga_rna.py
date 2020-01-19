@@ -1,16 +1,15 @@
 import numpy as np
 import pandas as pd
 import statsmodels as sm
+from statsmodels.stats.diagnostic import kstest_normal
 
 from util import *
 
 
-def rnaseq_load(cancer_type):
+def rnaseq_load(path):
     ''' Load RnaSeq dataFrame and remove first row '''
-    data_path = Path('data')
-    file_name = data_path / 'tcga' / f"{cancer_type}.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt"
-    print(f"Loading file: '{file_name}'")
-    df = pd.read_csv(file_name, sep="\t", index_col=0, low_memory=False)
+    print(f"Loading file: '{path}'")
+    df = pd.read_csv(path, sep="\t", index_col=0, low_memory=False)
     df.drop('gene_id', inplace=True) # Remove second row, we don't use it
     df = df.astype('float')  # Convert values to float
     df.index.name = None  # Remove index name
@@ -88,7 +87,7 @@ def normality_test(x, use_logp1, count_min=30):
         if (x > 0).sum() < count_min:
             return np.nan
         x = np.log(x + 1) if use_logp1 else x
-        norm_test = sm.api.stats.diagnostic.kstest_normal(x)
+        norm_test = kstest_normal(x)
         return norm_test[1]  # This is the p-value
     except ValueError:
         return np.nan  # Test failed
@@ -147,6 +146,6 @@ def load_filter_transform(cancer_type, filters=filters_default, transforms=trans
     df = rnaseq_load(cancer_type)
     df = apply_all(df, filters)
     df = apply_all(df, transforms)
-    return df
+    return df.transpose()
 
 
