@@ -13,7 +13,7 @@ def rnaseq_load(path):
     if DEBUG:
         print(f"Loading file: '{path}'")
     df = pd.read_csv(path, sep="\t", index_col=0, low_memory=False)
-    df.drop('gene_id', inplace=True) # Remove second row, we don't use it
+    df.drop('gene_id', inplace=True)  # Remove second row, we don't use it
     df = df.astype('float')  # Convert values to float
     df.index.name = None  # Remove index name
     return df
@@ -31,7 +31,7 @@ def rnaseq_save(df, cancer_type, name):
 def is_tumor(bar_code):
     ''' Is the barcode tumor? '''
     tissue_type = bar_code.split('-')[3]
-    return tissue_type[0] == '0' # First character '0' indicates tumor
+    return tissue_type[0] == '0'  # First character '0' indicates tumor
 
 
 def get_normals(df):
@@ -82,7 +82,7 @@ def filter_too_many_missing(df, count_min=0.9):
 
 def normality_test(x, use_logp1, count_min=30):
     """ Check is a vector 'x' is normally distributed
-    (or normally distributed after log+1) 
+    (or normally distributed after log+1)
     Return: Test's p-value, e.g. if p-value < 0.05, the variable
             might not be normal
     """
@@ -99,11 +99,11 @@ def normality_test(x, use_logp1, count_min=30):
 
 def normality(df, use_logp1):
     """ Do a normality test, or a log-normality test if '''use_log' is set """
-    pvals = [normality_test(df.iloc[i,], use_logp1) for i in range(df.shape[0])]
+    pvals = [normality_test(df.iloc[i, ], use_logp1) for i in range(df.shape[0])]
     pvals = np.array(pvals)
     if np.isnan(pvals).sum() > 0:
         print(f"Failed tests: {np.isnan(pvals).sum()}")
-    pvals = np.nan_to_num(pvals, nan=0) # Test failed? Assume not normal
+    pvals = np.nan_to_num(pvals, nan=0)  # Test failed? Assume not normal
     return pvals
 
 
@@ -129,12 +129,11 @@ def rename_genes(df):
     df.index = [g.split('|')[0] for g in df.index]
     return df
 
-filters_default = [filter_invalid_genes
-           , filter_duplicated_gene_names
-           , filter_low_normals_count
-           , filter_too_many_missing
-           , filter_non_normals
-           ]
+
+filters_default = [filter_invalid_genes, filter_duplicated_gene_names,
+                   filter_low_normals_count, filter_too_many_missing,
+                   filter_non_normals]
+
 
 transforms_default = [logp1_normalize, rename_genes]
 
@@ -153,5 +152,3 @@ def load_filter_transform(cancer_type, filters=filters_default, transforms=trans
     df = apply_all(df, filters)
     df = apply_all(df, transforms)
     return df.transpose()
-
-

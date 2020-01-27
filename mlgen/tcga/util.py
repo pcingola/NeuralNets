@@ -18,6 +18,7 @@ def find_files(path, pattern=None):
         all_files = [f for f in all_files if f.match(pattern)]
     return all_files
 
+
 # OK, let's do some duck-typing
 Path.ls = ls
 Path.find_files = find_files

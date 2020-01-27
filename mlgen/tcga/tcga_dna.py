@@ -1,30 +1,32 @@
 import pandas as pd
 
-from util import *
+from .util import *
 
 
 # Which variants are expected to be 'high impact'?
-high_impact_variants = set(['Frame_Shift_Del', 'Frame_Shift_Ins', 'In_Frame_Del'
-                   , 'In_Frame_Ins', 'Indel', 'Intron', 'Missense'
-                   , 'Missense_Mutation', 'Nonsense_Mutation', 'Nonstop_Mutation'
-                   , 'Read-through', 'Splice_Site', 'Splice_Site_Del'
-                   , 'Splice_Site_Ins', 'Splice_Site_SNP', 'Translation_Start_Site'])
+high_impact_variants = set(['Frame_Shift_Del', 'Frame_Shift_Ins', 'In_Frame_Del',
+                            'In_Frame_Ins', 'Indel', 'Intron', 'Missense',
+                            'Missense_Mutation', 'Nonsense_Mutation', 'Nonstop_Mutation',
+                            'Read-through', 'Splice_Site', 'Splice_Site_Del',
+                            'Splice_Site_Ins', 'Splice_Site_SNP', 'Translation_Start_Site'])
 
 
 def path_to_sample(path):
     """ Return the sample name from MAF file path """
     return path.stem.split('.')[0]
 
+
 # A simple test case
 assert 'TCGA-IH-A3EA-01' == path_to_sample(Path('data/tcga/gdac.broadinstitute.org_SKCM.Mutation_Packager_Calls.Level_3.2016012800.0.0/TCGA-IH-A3EA-01.maf.txt'))
 
 
 def path_to_cancer_type(path):
-    """ Return the cancre type MAF file path 
+    """ Return the cancre type MAF file path
     For example, path='data/tcga/gdac.broadinstitute.org_SKCM.Mutation_Packager_Calls.Level_3.2016012800.0.0/TCGA-IH-A3EA-01.maf.txt'
     we want to return 'SKCM'
     """
     return path.parent.stem.split('.')[2].split('_')[1]
+
 
 # A simple test case
 assert 'SKCM' == path_to_cancer_type(Path('data/tcga/gdac.broadinstitute.org_SKCM.Mutation_Packager_Calls.Level_3.2016012800.0.0/TCGA-IH-A3EA-01.maf.txt'))
@@ -72,4 +74,3 @@ def variants_df(by_sample):
     """ Create a dataframe containing number of variants per sample """
     df = pd.DataFrame(by_sample, index=get_all_genes(by_sample), columns=sorted(list(by_sample.keys())))
     return df.fillna(0).transpose()
-
