@@ -39,3 +39,6 @@
 
 - Hyper-parameter tunning
 
+- Stacking and blending
+
+	
