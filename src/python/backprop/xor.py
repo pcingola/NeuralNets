@@ -55,7 +55,7 @@ class Neuron:
         return self.out * (1.0 - self.out)
 
     def reset_delta_w(self):
-        self.delta_w = np.zeros((self.fan_in)) # Weight update
+        self.delta_w = np.zeros((self.fan_in))  # Weight update
 
     def update_w(self, eta):
         ''' Update weights '''
