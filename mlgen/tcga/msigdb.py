@@ -3,18 +3,17 @@ def gene_genesets(msigdb):
     """ Iterate over all (geneset, gene) pairs from MsigDb dictionary """
     ggs = dict()
     for gs, genes in msigdb.items():
-        for gene in genes.keys():
+        for gene in genes:
             if gene not in ggs:
-                ggs[gene] = gs
-            else:
-                ggs[gene] += f" {gs}"
+                ggs[gene] = set()
+            ggs[gene].add(gs)
     return ggs
 
 
 def geneset_gene_pairs(msigdb):
     """ Iterate over all (geneset, gene) pairs from MsigDb dictionary """
     for gs, genes in msigdb.items():
-        for gene in genes.keys():
+        for gene in genes:
             yield gs, gene
 
 
@@ -28,7 +27,7 @@ def msigdb2df(path):
 
 def msigdb2genes(msigdb):
     """ Get a (sorted) list of all genes in MsigDb """
-    genes = set([g for by_gene in msigdb.values() for g in by_gene.keys()])
+    genes = set([g for genes in msigdb.values() for g in genes])
     genes = list(genes)
     genes.sort()
     return genes
@@ -47,7 +46,7 @@ def read_msigdb(path):
         fields = line.split('\t')
         geneset_name = fields[0]
         if geneset_name:
-            msigdb[geneset_name] = {f: 1 for f in fields[2:]}
+            msigdb[geneset_name] = set(fields[2:])
     return msigdb
 
 
@@ -61,6 +60,6 @@ def read_msigdb_all(path, regex="*.gmt"):
 
 
 def save_gene_geneset(msigdb, path_save):
-    pairs_str = '\n'.join([f"{g},{gss}" for g,gss in gene_genesets(msigdb).items()])
+    pairs_str = '\n'.join([f"{g},{','.join(gss)}" for g, gss in gene_genesets(msigdb).items()])
     path_save.write_text(pairs_str)
 
